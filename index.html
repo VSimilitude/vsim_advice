@@ -160,15 +160,17 @@ function pick(query) {
   const q = query.toLowerCase();
   const words = tokens(query);
   const scored = ADVICE.map(a => {
-    let score = 0;
+    // Score = number of distinct query words (or phrases) that hit a tag,
+    // so "building" and "buildings" don't double-count one word.
+    const hits = new Set();
     for (const tag of a.tags) {
       const t = tag.toLowerCase();
-      const hit = t.includes(" ")
-        ? q.includes(t)
-        : words.some(w => w === t || (w.length > 3 && (w.startsWith(t) || t.startsWith(w))));
-      if (hit) score++;
+      if (t.includes(" ")) { if (q.includes(t)) hits.add(t); continue; }
+      for (const w of words) {
+        if (w === t || (w.length > 3 && (w.startsWith(t) || t.startsWith(w)))) hits.add(w);
+      }
     }
-    return { a, score };
+    return { a, score: hits.size };
   }).filter(s => s.score > 0);
   if (!scored.length) return null;
   // Weighted random over keyword score: stronger matches come up more often,
