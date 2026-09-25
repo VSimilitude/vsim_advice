@@ -169,11 +169,22 @@ function pick(query) {
       if (hit) score++;
     }
     return { a, score };
-  }).filter(s => s.score > 0).sort((x, y) => y.score - x.score);
+  }).filter(s => s.score > 0);
   if (!scored.length) return null;
-  const top = scored.filter(s => s.score === scored[0].score);
-  return top[Math.floor(Math.random() * top.length)].a;
+  // Weighted random: weight grows with score squared, so strong matches dominate
+  // but weaker matches still show up now and then. Avoid repeating the last answer.
+  const pool = scored.length > 1 ? scored.filter(s => s.a !== lastPick) : scored;
+  const total = pool.reduce((sum, s) => sum + s.score * s.score, 0);
+  let r = Math.random() * total;
+  for (const s of pool) {
+    r -= s.score * s.score;
+    if (r <= 0) { lastPick = s.a; return s.a; }
+  }
+  lastPick = pool[pool.length - 1].a;
+  return lastPick;
 }
+let lastPick = null;
+let lastFallback = -1;
 
 const out = document.getElementById("out");
 document.getElementById("ask").addEventListener("submit", e => {
@@ -186,7 +197,10 @@ document.getElementById("ask").addEventListener("submit", e => {
     title = hit.title;
     body = cane ? hit.cane : hit.text;
   } else {
-    const f = FALLBACK[Math.floor(Math.random() * FALLBACK.length)];
+    let i;
+    do { i = Math.floor(Math.random() * FALLBACK.length); } while (i === lastFallback && FALLBACK.length > 1);
+    lastFallback = i;
+    const f = FALLBACK[i];
     title = cane ? "OKAY LISTEN UP!" : "General tip";
     body = cane ? f.cane : f.text;
   }
