@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Last War Advisor</title>
+<meta name="description" content="Ask a question, get keyword-matched Last War: Survival strategy advice.">
+<style>
+  :root {
+    --bg: #f4f1ea;
+    --panel: #ffffff;
+    --text: #1d1d1b;
+    --muted: #6b6a66;
+    --accent: #c2410c;
+    --accent-text: #ffffff;
+    --border: #d9d4c7;
+    --chip: #ede7d9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #15171a; --panel: #1f2226; --text: #ecebe6; --muted: #9a9890;
+      --accent: #f97316; --accent-text: #15171a; --border: #33373d; --chip: #2b2f35;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #15171a; --panel: #1f2226; --text: #ecebe6; --muted: #9a9890;
+    --accent: #f97316; --accent-text: #15171a; --border: #33373d; --chip: #2b2f35;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding: 16px;
+  }
+  main { max-width: 640px; margin: 0 auto; }
+  h1 { font-size: 1.6rem; margin: 24px 0 4px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); margin: 0 0 20px; }
+  form { display: flex; gap: 8px; flex-wrap: wrap; }
+  input[type=text] {
+    flex: 1 1 260px; padding: 12px 14px; font-size: 1rem; color: var(--text);
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+  }
+  input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  button {
+    padding: 12px 18px; font-size: 1rem; font-weight: 600; cursor: pointer;
+    background: var(--accent); color: var(--accent-text); border: 0; border-radius: 10px;
+  }
+  button:active { transform: translateY(1px); }
+  .card {
+    margin-top: 20px; padding: 18px 20px; background: var(--panel);
+    border: 1px solid var(--border); border-radius: 12px;
+  }
+  .card h2 { font-size: 1.05rem; margin: 0 0 8px; }
+  .card p { margin: 0; }
+  .tags { margin-top: 12px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag { font-size: 0.78rem; padding: 3px 9px; border-radius: 999px; background: var(--chip); color: var(--muted); }
+  .hint { margin-top: 14px; font-size: 0.85rem; color: var(--muted); }
+  .hidden { display: none; }
+  footer { margin-top: 32px; font-size: 0.8rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Last War Advisor</h1>
+  <p class="sub">Ask anything about Last War: Survival. Matched advice comes back, random when nothing matches.</p>
+
+  <form id="ask">
+    <input id="q" type="text" placeholder="e.g. What tank build is best?" autocomplete="off" autofocus>
+    <button type="submit">Get advice</button>
+  </form>
+
+  <section id="out" class="card hidden" aria-live="polite">
+    <h2 id="title"></h2>
+    <p id="body"></p>
+    <div id="tags" class="tags"></div>
+  </section>
+  <p class="hint">Try: tank heroes, aircraft, missiles, gems, drone, alliance duel, zombie siege, VS points, spending.</p>
+
+  <footer>Unofficial fan tool. Advice is general and not tied to any season or patch.</footer>
+</main>
+
+<script>
+const ADVICE = [
+  { title: "Tank squad", tags: ["tank","tanks","build","hero","heroes","murphy","kimberly","stetmann","frontline","defense","defence","hp"],
+    text: "Tanks live and die on the front row. Murphy is the standard shield for early to mid game because his taunt soaks damage while your back row works. Once you can afford it, Kimberly becomes the long-term front line, with Stetmann as the sustain piece. Put your two highest HP tanks in the front slots, pour gear upgrades into their chest and boots first, and keep tank tech at least level with your main squad's march tier." },
+  { title: "Aircraft squad", tags: ["aircraft","air","plane","planes","jet","carlie","violet","dva","d.va","damage","dps","backline"],
+    text: "Aircraft are your burst damage. A common setup is Carlie or Violet as the main carrier with two tanks in front to absorb the opening volley. Aircraft counter tanks, so lean into them when your server's top players run tank-heavy lineups. Feed one carrier all your duplicates for skill levels rather than spreading shards across three heroes." },
+  { title: "Missile squad", tags: ["missile","missiles","rocket","artillery","swift","tesla","lucius","range","aoe"],
+    text: "Missile heroes counter aircraft and bring area damage. Swift is a reliable early carry, and Tesla or Lucius scale well later. Missiles are fragile, so never run more than two in a squad without a tank line in front. Their gear priority is weapon first, then helmet, because their value is kill speed, not survival." },
+  { title: "Squad formation basics", tags: ["formation","lineup","line-up","squad","team","comp","composition","arrange","position","order"],
+    text: "A standard five-hero squad is two tanks front, one support in the middle, two damage dealers back. Keep hero types matched to the counter triangle: tanks beat missiles, missiles beat aircraft, aircraft beat tanks. Check the enemy's front line before a fight and swap your damage type to counter it. Consistency matters more than variety; one fully built squad beats three half-built ones." },
+  { title: "Spending gems", tags: ["gem","gems","diamond","diamonds","spend","spending","buy","shop","purchase","worth","f2p","free"],
+    text: "Save gems for the recruit event that gives bonus pulls and for the VIP shop's discounted hero shards. Avoid spending gems on speed-ups or resources; those come free from daily tasks and alliance help. If you are free to play, the best value packs are the first-time-purchase bundles and the monthly card, everything else is a luxury." },
+  { title: "Drone and drone parts", tags: ["drone","parts","drone parts","chip","chips","module","combat data"],
+    text: "The drone is a silent stat multiplier for every squad. Level it every time you have combat data, then use drone parts on the blue and purple quality lines before chasing gold. Parts with squad-wide attack or HP are almost always the right pick. Do not dismantle high-tier parts until you have replacements ready." },
+  { title: "Alliance duel and VS points", tags: ["vs","versus","alliance duel","duel","points","daily","schedule","monday","tuesday","wednesday","thursday","friday","saturday","score"],
+    text: "Alliance Duel is won by timing, not power. Bank your speed-ups, radar tasks, hero shards, and truck deliveries for the day that scores them. A rough guide: Monday radar and buildings, Tuesday base construction, Wednesday tech, Thursday hero recruitment and upgrades, Friday truck and training, Saturday kills. Spend nothing off-day that could score double on the right day." },
+  { title: "Zombie siege and base defense", tags: ["zombie","zombies","siege","attack","defend","defense","defence","base","wall","turret","shelter","bubble","shield"],
+    text: "Zombie siege waves scale with your headquarters level, so do not rush HQ ahead of your squads. Station your strongest squad in the wall garrison and keep shelter space for your marches. Against player attacks, an eight-hour shield bought with gems is cheaper than losing a full hospital of troops, especially before you log off for the night." },
+  { title: "Headquarters and buildings", tags: ["hq","headquarters","building","buildings","upgrade","level","construction","builder","queue","tech","research","science"],
+    text: "Upgrade your headquarters only when your barracks, hospital, and tech center are already at cap for the current level. Run two builder queues at all times and use alliance help before spending any speed-ups. In research, finish the economy tree for resource production first, then hero and squad combat lines. Idle queues are the single biggest waste of progress." },
+  { title: "Hero recruitment", tags: ["recruit","recruitment","summon","pull","pulls","shards","ur","ssr","sr","rarity","star","stars","ascend"],
+    text: "Focus on a small set of UR heroes and take them to five stars before widening your roster. Use SSR duplicates as fodder for exclusive weapons or star-up materials rather than levelling them. Pull during recruitment events with milestone rewards, and always finish the ten-pull discount tier once you start it." },
+  { title: "Season and server events", tags: ["season","event","events","server","cross-server","capitol","capital","desert","storm","warzone","kvk"],
+    text: "Season events reward preparation. Stockpile resources and troops during the quiet weeks so you can hit full marches when the map opens. Coordinate with your alliance on which buildings to hold, since a single capital-sized objective is worth more than scattered kills. Read the event rules the day they release, because scoring rules change each season." },
+  { title: "Resources and farming", tags: ["resource","resources","food","iron","coin","coins","gold","farm","farming","gather","gathering","tiles","truck","trade"],
+    text: "Gathering with your five marches every night is worth more than any single pack. Send full-capacity squads to level-four or higher tiles near your alliance territory and collect before the daily reset. Keep resources below your warehouse protection limit if you are a raid target, and convert extra into buildings quickly." },
+  { title: "Troops and training", tags: ["troop","troops","train","training","soldier","soldiers","tier","t9","t10","hospital","heal","healing"],
+    text: "Train the highest tier your barracks allows, but keep enough lower tier to fill your marches for gathering. A hospital that is always upgraded means fewer permanent losses in siege and duels. Before any big fight, queue long training runs so the alliance duel training day counts them when they finish." },
+  { title: "Alliance choice", tags: ["alliance","join","guild","clan","rank","r4","r5","leader","donate","donation","gift","gifts"],
+    text: "Join the most active alliance you can qualify for, not the largest. Daily help clicks, tech donations, and gift chests from packs add up more than any personal grind. Donate tech every day for coins and pick an alliance whose active hours match yours, because rally timing decides most fights." },
+  { title: "Profession and skills", tags: ["profession","skill","skills","passive","exclusive","weapon","weapons","equipment","gear","armor","armour"],
+    text: "Level hero skills in this order: the main damage or shield skill first, the passive that adds attack or HP second, and the ultimate last. Gear should be raised evenly across a squad rather than maxing one piece. Exclusive weapons are a huge power jump on carries, so start collecting shards for your main damage dealer early." }
+];
+
+const FALLBACK = [
+  "Consistency beats power spikes. Log in twice a day, clear daily tasks, and keep both builder queues busy.",
+  "Focus resources on one squad until it is fully geared, then start a second. Spreading power thin loses fights.",
+  "Learn the counter triangle: tanks beat missiles, missiles beat aircraft, aircraft beat tanks. Swap squads to match.",
+  "Never spend speed-ups on a day the Alliance Duel does not score them. Timing is free power.",
+  "Shield up before you log off if you have troops outside the shelter. Hospitals are cheap; rebuilding is not.",
+  "Save gems for hero recruitment events and discounted shards rather than resources."
+];
+
+const STOP = new Set(["what","is","the","best","a","an","for","to","in","of","and","how","do","i","my","should","which","on","with","are","can","get","me","about","some","any","good"]);
+
+function tokens(text) {
+  return text.toLowerCase().replace(/[^a-z0-9.\s-]/g, " ").split(/\s+/).filter(w => w && !STOP.has(w));
+}
+
+function pick(query) {
+  const words = tokens(query);
+  const scored = ADVICE.map(a => {
+    let score = 0;
+    const hits = [];
+    for (const tag of a.tags) {
+      const t = tag.toLowerCase();
+      if (t.includes(" ") ? query.toLowerCase().includes(t) : words.some(w => w === t || (w.length > 3 && (w.startsWith(t) || t.startsWith(w))))) {
+        score++; hits.push(tag);
+      }
+    }
+    return { a, score, hits };
+  }).filter(s => s.score > 0).sort((x, y) => y.score - x.score);
+  if (!scored.length) return null;
+  const top = scored.filter(s => s.score === scored[0].score);
+  return top[Math.floor(Math.random() * top.length)];
+}
+
+const form = document.getElementById("ask");
+const out = document.getElementById("out");
+form.addEventListener("submit", e => {
+  e.preventDefault();
+  const q = document.getElementById("q").value.trim();
+  const hit = pick(q);
+  const tags = document.getElementById("tags");
+  tags.innerHTML = "";
+  if (hit) {
+    document.getElementById("title").textContent = hit.a.title;
+    document.getElementById("body").textContent = hit.a.text;
+    for (const t of [...new Set(hit.hits)]) {
+      const s = document.createElement("span"); s.className = "tag"; s.textContent = t; tags.appendChild(s);
+    }
+  } else {
+    document.getElementById("title").textContent = q ? "No direct match, general tip" : "Random tip";
+    document.getElementById("body").textContent = FALLBACK[Math.floor(Math.random() * FALLBACK.length)];
+  }
+  out.classList.remove("hidden");
+});
+</script>
+</body>
+</html>
