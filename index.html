@@ -167,18 +167,26 @@ function pick(query) {
 
 const out = document.getElementById("out");
 const titleEl = document.getElementById("title");
-document.getElementById("ask").addEventListener("submit", e => {
-  e.preventDefault();
-  const cane = document.getElementById("cane-mode").checked;
-  const q = document.getElementById("q").value.trim();
-  const hit = pick(q);
-  if (!hit) return;
+const caneBox = document.getElementById("cane-mode");
+let current = null;
+
+function render() {
+  if (!current) return;
+  const cane = caneBox.checked;
   titleEl.textContent = "OKAY LISTEN UP!";
   titleEl.classList.toggle("hidden", !cane);
-  document.getElementById("body").textContent = cane ? hit.cane : hit.text;
+  document.getElementById("body").textContent = cane ? current.cane : current.text;
   out.classList.toggle("cane", cane);
   out.classList.remove("hidden");
+}
+
+document.getElementById("ask").addEventListener("submit", e => {
+  e.preventDefault();
+  current = pick(document.getElementById("q").value.trim());
+  render();
 });
+// Toggling Cane-mode re-renders the same answer in the other voice.
+caneBox.addEventListener("change", render);
 </script>
 </body>
 </html>
