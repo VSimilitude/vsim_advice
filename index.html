@@ -64,150 +64,118 @@
   </div>
 
   <section id="out" class="card hidden" aria-live="polite">
-    <h2 id="title"></h2>
+    <h2 id="title" class="hidden"></h2>
     <p id="body"></p>
   </section>
 </main>
 
+<script src="advice.js"></script>
 <script>
-// Each entry: title, tags (matched against the question), text (normal), cane (Cane-mode).
-// Matching always uses tags, regardless of mode.
-const ADVICE = [
-  { title: "Tank squad",
-    tags: ["tank","tanks","build","hero","heroes","murphy","kimberly","stetmann","frontline","defense","defence","hp"],
-    text: "Tanks live and die on the front row. Murphy is the standard shield for early to mid game because his taunt soaks damage while your back row works. Once you can afford it, Kimberly becomes the long-term front line, with Stetmann as the sustain piece. Put your two highest HP tanks in the front slots, pour gear upgrades into their chest and boots first, and keep tank tech at least level with your main squad's march tier.",
-    cane: "TANKS GO IN FRONT! Murphy is your big shield! BONK!\nGot Kimberly? She's the FOREVER tank! Stetmann keeps everyone alive!\nTwo biggest tanks up front. Chest and boots first! Tank tech UP UP UP!" },
-  { title: "Aircraft squad",
-    tags: ["aircraft","air","plane","planes","jet","carlie","violet","dva","d.va","damage","dps","backline"],
-    text: "Aircraft are your burst damage. A common setup is Carlie or Violet as the main carrier with two tanks in front to absorb the opening volley. Aircraft counter tanks, so lean into them when your server's top players run tank-heavy lineups. Feed one carrier all your duplicates for skill levels rather than spreading shards across three heroes.",
-    cane: "PLANES GO ZOOOOM! Carlie or Violet in the back! Two tanks in front to take the hits!\nPlanes BEAT tanks! See lots of tanks? BRING PLANES!\nPick ONE plane hero and feed it ALL the shards! NOM NOM NOM!" },
-  { title: "Missile squad",
-    tags: ["missile","missiles","rocket","artillery","swift","tesla","lucius","range","aoe"],
-    text: "Missile heroes counter aircraft and bring area damage. Swift is a reliable early carry, and Tesla or Lucius scale well later. Missiles are fragile, so never run more than two in a squad without a tank line in front. Their gear priority is weapon first, then helmet, because their value is kill speed, not survival.",
-    cane: "MISSILES GO KABOOM! They beat planes!\nSwift first, then Tesla or Lucius when you're big!\nMissiles are squishy! Only two, and put tanks in front! Weapon first, then helmet! PEW PEW PEW!" },
-  { title: "Squad formation basics",
-    tags: ["formation","lineup","line-up","squad","team","comp","composition","arrange","position","order"],
-    text: "A standard five-hero squad is two tanks front, one support in the middle, two damage dealers back. Keep hero types matched to the counter triangle: tanks beat missiles, missiles beat aircraft, aircraft beat tanks. Check the enemy's front line before a fight and swap your damage type to counter it. Consistency matters more than variety; one fully built squad beats three half-built ones.",
-    cane: "Two tanks in FRONT! One helper in the MIDDLE! Two hitters in the BACK!\nTanks beat missiles! Missiles beat planes! Planes beat tanks! Like rock paper scissors!\nLook at the bad guy's front row FIRST, then pick your team! ONE big squad beats THREE little ones!" },
-  { title: "Spending gems",
-    tags: ["gem","gems","diamond","diamonds","spend","spending","buy","shop","purchase","worth","f2p","free"],
-    text: "Save gems for the recruit event that gives bonus pulls and for the VIP shop's discounted hero shards. Avoid spending gems on speed-ups or resources; those come free from daily tasks and alliance help. If you are free to play, the best value packs are the first-time-purchase bundles and the monthly card, everything else is a luxury.",
-    cane: "DON'T SPEND YOUR GEMS, SILLY!\nSave them for hero pulls and cheap shards in the VIP shop!\nNever buy speed-ups with gems! Those are FREE! If you buy anything, get the monthly card. That's it! HANDS OFF!" },
-  { title: "Drone and drone parts",
-    tags: ["drone","parts","drone parts","chip","chips","module","combat data"],
-    text: "The drone is a silent stat multiplier for every squad. Level it every time you have combat data, then use drone parts on the blue and purple quality lines before chasing gold. Parts with squad-wide attack or HP are almost always the right pick. Do not dismantle high-tier parts until you have replacements ready.",
-    cane: "THE DRONE MAKES EVERYONE STRONGER! BZZZZZ!\nGot combat data? LEVEL IT UP RIGHT NOW!\nBlue and purple parts first, gold later! Pick parts that give attack or HP to EVERYBODY! Don't smash good parts until you have new ones!" },
-  { title: "Alliance duel and VS points",
-    tags: ["vs","versus","alliance duel","duel","points","daily","schedule","monday","tuesday","wednesday","thursday","friday","saturday","score"],
-    text: "Alliance Duel is won by timing, not power. Bank your speed-ups, radar tasks, hero shards, and truck deliveries for the day that scores them. A rough guide: Monday radar and buildings, Tuesday base construction, Wednesday tech, Thursday hero recruitment and upgrades, Friday truck and training, Saturday kills. Spend nothing off-day that could score double on the right day.",
-    cane: "WAIT FOR THE RIGHT DAY! Then POINTS POINTS POINTS!\nMonday radar! Tuesday buildings! Wednesday tech! Thursday HEROES! Friday trucks and troops! Saturday SMASH!\nSave your speed-ups! Save your shards! Don't spend on the wrong day, SILLY!" },
-  { title: "Zombie siege and base defense",
-    tags: ["zombie","zombies","siege","attack","defend","defense","defence","base","wall","turret","shelter","bubble","shield"],
-    text: "Zombie siege waves scale with your headquarters level, so do not rush HQ ahead of your squads. Station your strongest squad in the wall garrison and keep shelter space for your marches. Against player attacks, an eight-hour shield bought with gems is cheaper than losing a full hospital of troops, especially before you log off for the night.",
-    cane: "ZOMBIES ARE COMING! RAAAWR!\nBest squad on the WALL! Other troops in the SHELTER!\nDon't level HQ too fast or the zombies get BIGGER! Going to bed? PUT UP A BUBBLE! Bubble is cheap, dead troops are NOT!" },
-  { title: "Headquarters and buildings",
-    tags: ["hq","headquarters","building","buildings","upgrade","level","construction","builder","queue","tech","research","science"],
-    text: "Upgrade your headquarters only when your barracks, hospital, and tech center are already at cap for the current level. Run two builder queues at all times and use alliance help before spending any speed-ups. In research, finish the economy tree for resource production first, then hero and squad combat lines. Idle queues are the single biggest waste of progress.",
-    cane: "BUILD BUILD BUILD! Never let a builder sit still!\nBarracks, hospital, tech center FIRST! Then HQ!\nAsk your alliance for help BEFORE using speed-ups! Research the money stuff first, then the fighting stuff! GO GO GO!" },
-  { title: "Hero recruitment",
-    tags: ["recruit","recruitment","summon","pull","pulls","shards","ur","ssr","sr","rarity","star","stars","ascend"],
-    text: "Focus on a small set of UR heroes and take them to five stars before widening your roster. Use SSR duplicates as fodder for exclusive weapons or star-up materials rather than levelling them. Pull during recruitment events with milestone rewards, and always finish the ten-pull discount tier once you start it.",
-    cane: "PICK A FEW UR HEROES AND MAKE THEM FIVE STARS! SHINY!\nExtra SSRs? FEED THEM to your weapons! NOM!\nOnly pull during EVENTS! Started a ten-pull? FINISH IT! No stopping halfway, silly!" },
-  { title: "Season and server events",
-    tags: ["season","event","events","server","cross-server","capitol","capital","desert","storm","warzone","kvk"],
-    text: "Season events reward preparation. Stockpile resources and troops during the quiet weeks so you can hit full marches when the map opens. Coordinate with your alliance on which buildings to hold, since a single capital-sized objective is worth more than scattered kills. Read the event rules the day they release, because scoring rules change each season.",
-    cane: "BIG SEASON EVENT! GET READY!\nSave up troops and stuff in the quiet weeks! Then GO FULL BLAST!\nStick with your alliance! Grab the BIG building together! Read the rules first, they change EVERY time!" },
-  { title: "Resources and farming",
-    tags: ["resource","resources","food","iron","coin","coins","gold","farm","farming","gather","gathering","tiles","truck","trade"],
-    text: "Gathering with your five marches every night is worth more than any single pack. Send full-capacity squads to level-four or higher tiles near your alliance territory and collect before the daily reset. Keep resources below your warehouse protection limit if you are a raid target, and convert extra into buildings quickly.",
-    cane: "SEND ALL FIVE SQUADS TO GATHER EVERY NIGHT! EVERY! NIGHT!\nBig tiles near your alliance! Level four or more!\nGot lots of stuff? SPEND IT ON BUILDINGS before someone steals it! MINE MINE MINE!" },
-  { title: "Troops and training",
-    tags: ["troop","troops","train","training","soldier","soldiers","tier","t9","t10","hospital","heal","healing"],
-    text: "Train the highest tier your barracks allows, but keep enough lower tier to fill your marches for gathering. A hospital that is always upgraded means fewer permanent losses in siege and duels. Before any big fight, queue long training runs so the alliance duel training day counts them when they finish.",
-    cane: "TRAIN THE BIGGEST TROOPS YOU CAN! STOMP STOMP!\nKeep some little ones for gathering!\nKeep the HOSPITAL big so nobody dies for real! Before a fight, start a LONG training so it finishes on training day! POINTS!" },
-  { title: "Alliance choice",
-    tags: ["alliance","join","guild","clan","rank","r4","r5","leader","donate","donation","gift","gifts"],
-    text: "Join the most active alliance you can qualify for, not the largest. Daily help clicks, tech donations, and gift chests from packs add up more than any personal grind. Donate tech every day for coins and pick an alliance whose active hours match yours, because rally timing decides most fights.",
-    cane: "JOIN THE BUSIEST ALLIANCE, NOT THE BIGGEST!\nClick HELP every day! Donate tech EVERY day! Open the gifts!\nPick friends who play when YOU play! Rallies need EVERYBODY! TEAMWORK!" },
-  { title: "Profession and skills",
-    tags: ["profession","skill","skills","passive","exclusive","weapon","weapons","equipment","gear","armor","armour"],
-    text: "Level hero skills in this order: the main damage or shield skill first, the passive that adds attack or HP second, and the ultimate last. Gear should be raised evenly across a squad rather than maxing one piece. Exclusive weapons are a huge power jump on carries, so start collecting shards for your main damage dealer early.",
-    cane: "BIG HIT SKILL FIRST! Then the attack or HP passive! Ultimate LAST!\nLevel gear evenly, not one piece to the moon!\nEXCLUSIVE WEAPONS ARE HUGE! Start collecting shards for your best hitter NOW! SWOOSH!" }
-];
+// Advice entries live in advice.js: { text, cane, life? }.
+// Matching: each query word is stemmed and compared against the stemmed words of
+// every blurb's normal text (plus synonyms). Score = distinct query words that hit.
+const ADVICE = window.ADVICE || [];
 
-const FALLBACK = [
-  { text: "Consistency beats power spikes. Log in twice a day, clear daily tasks, and keep both builder queues busy.",
-    cane: "LOG IN EVERY DAY! Do your tasks! Keep the builders BUSY! Little bits every day WIN!" },
-  { text: "Focus resources on one squad until it is fully geared, then start a second. Spreading power thin loses fights.",
-    cane: "ONE SQUAD AT A TIME! Make it HUGE! Then start the next one! Don't spread it thin, silly!" },
-  { text: "Learn the counter triangle: tanks beat missiles, missiles beat aircraft, aircraft beat tanks. Swap squads to match.",
-    cane: "Tanks beat missiles! Missiles beat planes! Planes beat tanks! ROCK PAPER SCISSORS!" },
-  { text: "Never spend speed-ups on a day the Alliance Duel does not score them. Timing is free power.",
-    cane: "WAIT FOR THE RIGHT DAY! Then use ALL the speed-ups! POINTS POINTS POINTS!" },
-  { text: "Shield up before you log off if you have troops outside the shelter. Hospitals are cheap; rebuilding is not.",
-    cane: "GOING TO BED? PUT UP A BUBBLE! Keep your troops safe!" },
-  { text: "Save gems for hero recruitment events and discounted shards rather than resources.",
-    cane: "DON'T SPEND GEMS ON STUFF! Save them for HEROES!" }
-];
+const STOP = new Set(("what is the best a an for to in of and how do i my should which on with are can get me about " +
+  "some any good be it its this that you your or not just when where why who will would could does did have has had use using make need want " +
+  "than then there their they them these those more most much many very also into from but if at as by so up out no " +
+  "yes all one two three first last war game last-war lastwar vsim ask tell tip tips advice help please").split(" "));
 
-const STOP = new Set(["what","is","the","best","a","an","for","to","in","of","and","how","do","i","my","should","which","on","with","are","can","get","me","about","some","any","good"]);
+const SYN = {
+  gem: "diamond", gems: "diamond", diamonds: "diamond",
+  plane: "aircraft", planes: "aircraft", air: "aircraft", jet: "aircraft",
+  vs: "duel", versus: "duel",
+  f2p: "free", cheap: "free", budget: "free", spender: "free",
+  hq: "headquarters", base: "headquarters",
+  ds: "desert", storm: "desert",
+  money: "gold", cash: "gold",
+  tech: "research", science: "research",
+  troops: "troop", army: "troop", soldiers: "troop",
+  build: "building", construct: "building",
+  ar: "arms", race: "arms",
+  team: "squad", lineup: "formation", comp: "formation",
+  timing: "day", when: "day", calendar: "day",
+  hero: "heroes", heros: "heroes",
+  shard: "shards", medal: "medals", speedup: "speedups", speed: "speedups"
+};
 
-function tokens(text) {
-  return text.toLowerCase().replace(/[^a-z0-9.\s-]/g, " ").split(/\s+/).filter(w => w && !STOP.has(w));
+function stem(w) {
+  if (w.length > 5 && w.endsWith("ing")) return w.slice(0, -3);
+  if (w.length > 5 && w.endsWith("ies")) return w.slice(0, -3) + "y";
+  if (w.length > 4 && w.endsWith("ed")) return w.slice(0, -2);
+  if (w.length > 4 && w.endsWith("es")) return w.slice(0, -2);
+  if (w.length > 3 && w.endsWith("s")) return w.slice(0, -1);
+  return w;
+}
+function words(text) {
+  return text.toLowerCase().replace(/[’']/g, "").replace(/[^a-z0-9]+/g, " ").split(" ")
+    .filter(w => w && !STOP.has(w));
+}
+// Precompute stemmed word sets for every blurb, and how many blurbs each stem
+// appears in. Rare words (tank, radar) count for more than common ones (building).
+const INDEX = ADVICE.map(a => new Set(words(a.text).map(stem)));
+const DF = new Map();
+for (const set of INDEX) for (const w of set) DF.set(w, (DF.get(w) || 0) + 1);
+const weight = w => 1 / (DF.get(w) || 1);
+
+function queryStems(q) {
+  const out = new Set();
+  for (const w of words(q)) {
+    out.add(stem(w));
+    if (SYN[w]) out.add(stem(SYN[w]));
+  }
+  return [...out];
 }
 
+let lastPick = null;
+const LIFE_CHANCE = 1 / 12; // occasional off-topic life advice, whatever you asked
+
 function pick(query) {
-  const q = query.toLowerCase();
-  const words = tokens(query);
-  const scored = ADVICE.map(a => {
-    // Score = number of distinct query words (or phrases) that hit a tag,
-    // so "building" and "buildings" don't double-count one word.
-    const hits = new Set();
-    for (const tag of a.tags) {
-      const t = tag.toLowerCase();
-      if (t.includes(" ")) { if (q.includes(t)) hits.add(t); continue; }
-      for (const w of words) {
-        if (w === t || (w.length > 3 && (w.startsWith(t) || t.startsWith(w)))) hits.add(w);
+  const life = ADVICE.filter(a => a.life);
+  if (life.length && Math.random() < LIFE_CHANCE) {
+    const pool = life.filter(a => a !== lastPick);
+    return lastPick = pool[Math.floor(Math.random() * pool.length)];
+  }
+  const qs = queryStems(query);
+  const scored = [];
+  ADVICE.forEach((a, i) => {
+    let score = 0;
+    for (const s of qs) {
+      if (INDEX[i].has(s)) { score += weight(s); continue; }
+      // prefix match for longer stems (e.g. "research" vs "researching")
+      if (s.length >= 5) for (const w of INDEX[i]) {
+        if (w.startsWith(s) || (s.startsWith(w) && w.length >= 5)) { score += weight(w); break; }
       }
     }
-    return { a, score: hits.size };
-  }).filter(s => s.score > 0);
-  if (!scored.length) return null;
-  // Weighted random over keyword score: stronger matches come up more often,
-  // weaker ones still appear. With 3+ candidates, never repeat the last answer.
+    if (score > 0) scored.push({ a, score: score * score }); // square to sharpen
+  });
+  if (!scored.length) {
+    // No keyword hit: uniform random over everything except the last answer.
+    const pool = ADVICE.filter(a => a !== lastPick);
+    return lastPick = pool[Math.floor(Math.random() * pool.length)];
+  }
+  // Weighted random over keyword score. With 3+ candidates, never repeat.
   const pool = scored.length > 2 ? scored.filter(s => s.a !== lastPick) : scored;
   const total = pool.reduce((sum, s) => sum + s.score, 0);
   let r = Math.random() * total;
   for (const s of pool) {
     r -= s.score;
-    if (r <= 0) { lastPick = s.a; return s.a; }
+    if (r <= 0) return lastPick = s.a;
   }
-  lastPick = pool[pool.length - 1].a;
-  return lastPick;
+  return lastPick = pool[pool.length - 1].a;
 }
-let lastPick = null;
-let lastFallback = -1;
 
 const out = document.getElementById("out");
+const titleEl = document.getElementById("title");
 document.getElementById("ask").addEventListener("submit", e => {
   e.preventDefault();
   const cane = document.getElementById("cane-mode").checked;
   const q = document.getElementById("q").value.trim();
   const hit = pick(q);
-  let title, body;
-  if (hit) {
-    title = hit.title;
-    body = cane ? hit.cane : hit.text;
-  } else {
-    let i;
-    do { i = Math.floor(Math.random() * FALLBACK.length); } while (i === lastFallback && FALLBACK.length > 1);
-    lastFallback = i;
-    const f = FALLBACK[i];
-    title = cane ? "OKAY LISTEN UP!" : "General tip";
-    body = cane ? f.cane : f.text;
-  }
-  document.getElementById("title").textContent = title;
-  document.getElementById("body").textContent = body;
+  if (!hit) return;
+  titleEl.textContent = "OKAY LISTEN UP!";
+  titleEl.classList.toggle("hidden", !cane);
+  document.getElementById("body").textContent = cane ? hit.cane : hit.text;
   out.classList.toggle("cane", cane);
   out.classList.remove("hidden");
 });
