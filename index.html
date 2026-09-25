@@ -171,13 +171,13 @@ function pick(query) {
     return { a, score };
   }).filter(s => s.score > 0);
   if (!scored.length) return null;
-  // Weighted random: weight grows with score squared, so strong matches dominate
-  // but weaker matches still show up now and then. Avoid repeating the last answer.
-  const pool = scored.length > 1 ? scored.filter(s => s.a !== lastPick) : scored;
-  const total = pool.reduce((sum, s) => sum + s.score * s.score, 0);
+  // Weighted random over keyword score: stronger matches come up more often,
+  // weaker ones still appear. With 3+ candidates, never repeat the last answer.
+  const pool = scored.length > 2 ? scored.filter(s => s.a !== lastPick) : scored;
+  const total = pool.reduce((sum, s) => sum + s.score, 0);
   let r = Math.random() * total;
   for (const s of pool) {
-    r -= s.score * s.score;
+    r -= s.score;
     if (r <= 0) { lastPick = s.a; return s.a; }
   }
   lastPick = pool[pool.length - 1].a;
